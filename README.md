@@ -36,7 +36,7 @@ module.exports = {
 
 ## Contribution
 
-Any comments or suggestions are welcome to raise issues, or directly to [@alsotang](https://github.com/alsotang)
+Any comments or suggestions are welcome to raise issues, or directly to [@WOO3-LAB](https://github.com/WOO3-LAB)
 
 ## License
 
