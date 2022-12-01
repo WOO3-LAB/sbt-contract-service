@@ -1,18 +1,24 @@
 const {ethers } = require("ethers");
 const v1=require('../compiled/v1')
+const chainList=require('../chainConfig')
 
-function getProvider(){
-    const network=process.env.PROVIDER_NERWORK
-    return new ethers.providers.AlchemyProvider(network,process.env.ALCHEMY_KEY)
+function getProvider(chainId){
+    const {PROVIDER_NETWORK,ALCHEMY_KEY,RPC_NETWORK}=chainList[chainId]
+    if(ALCHEMY_KEY){
+        return new ethers.providers.AlchemyProvider(PROVIDER_NETWORK,ALCHEMY_KEY)
+    }else{
+        return new ethers.providers.JsonRpcProvider(RPC_NETWORK,{name:PROVIDER_NETWORK,chainId:Number(chainId)})
+    }
+    
 }
 
-function getSinger(){
-    return new ethers.Wallet(process.env.WALLET_KEY,getProvider())
+function getSinger(chainId){
+    return new ethers.Wallet(process.env.WALLET_KEY,getProvider(chainId))
 }
 
-function getContract(address){
+function getContract(address,chainId){
     const {abi}=v1
-    const singer=getSinger()
+    const singer=getSinger(chainId)
     return new ethers.Contract(address,abi,singer)
 }
 

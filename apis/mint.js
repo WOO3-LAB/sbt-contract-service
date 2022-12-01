@@ -1,26 +1,32 @@
 var express = require('express')
 var router = express.Router()
 const { parseUnits ,formatUnits} = require("ethers/lib/utils");
-const {getContract,msgFormat,failedFormat,getProvider}=require('../utils')
+const {getContract,msgFormat,failedFormat,getProvider, log}=require('../utils');
 
 router.post('/',async function (req, res) {
-    const {address,uri,contractAddress}=req.body
+    const {address,uri,contractAddress,chainId}=req.body
     if(!address) return res.send(failedFormat('required address'))
     if(!uri) return res.send(failedFormat('required uri'))
     if(!contractAddress) return res.send(failedFormat('required contractAddress'))
+    if(!chainId) return res.send(failedFormat('required chainId'))
     try {
-        const contract=getContract(contractAddress)
-        const provider=getProvider()
+        const contract=getContract(contractAddress,chainId)
+        const provider=getProvider(chainId)
         const price_unit = "gwei";
-        const price = formatUnits(await provider.getGasPrice(), price_unit);
+        const gasPrice=await provider.getGasPrice()
+        const price = formatUnits(gasPrice, price_unit);
+        log(price)
         contract.callStatic.safeMint(address,uri).then(async(success)=>{
+            log(success)
             if(success){
                 const tx=await contract.safeMint(address,uri,{
                     gasLimit: 3000000,
-                    gasPrice: parseUnits(price, price_unit),
+                    gasPrice: parseUnits((price*1.2).toFixed(6), price_unit),
                 })
-                const txRes=await tx.wait()
-                return res.send(msgFormat(txRes))
+                log(tx)
+                return res.send(msgFormat({...tx,transactionHash:tx.hash}))
+                // const txRes=await tx.wait()
+                // return res.send(msgFormat(txRes))
             }else{
                 return res.send(failedFormat('failed to mint address'))
             }

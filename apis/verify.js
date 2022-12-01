@@ -7,12 +7,12 @@ const {msgFormat,failedFormat,log}=require('../utils')
 
 
 router.post('/',async function (req, res) {
-    const {address,name}=req.body
+    const {address,name,chainId}=req.body
     const contractName=name+'SBT'
     try {
         let sourceCode=fs.readFileSync(path.resolve(__dirname,'../compiled/','input.json'),"utf-8")
         sourceCode=sourceCode.replace(/WooTemplate/g,contractName)
-        const result=await verify(address,sourceCode,contractName)
+        const result=await verify(address,sourceCode,contractName,chainId)
         if(result.status=='1'){
             res.send(msgFormat(result.result))
         }else{
@@ -25,10 +25,10 @@ router.post('/',async function (req, res) {
 })
 
 router.post('/status',async function (req, res) {
-    const {guid}=req.body
+    const {guid,chainId}=req.body
     try {
-        const result=await verifyStatus(guid)
-        if(result.status=='1'){
+        const result=await verifyStatus(guid,chainId)
+        if(result.status=='1'||(result.status==='0'&&result.result==='Already Verified')){
             res.send(msgFormat(result.result))
         }else{
             res.send(failedFormat(result))

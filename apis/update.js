@@ -4,23 +4,25 @@ const { parseUnits ,formatUnits} = require("ethers/lib/utils");
 const {getContract,msgFormat,failedFormat,getProvider}=require('../utils')
 
 router.post('/',async function (req, res) {
-    const {tokenId,uri,contractAddress}=req.body
+    const {tokenId,uri,contractAddress,chainId}=req.body
     if(!tokenId) return res.send(failedFormat('required tokenId'))
     if(!uri) return res.send(failedFormat('required uri'))
     if(!contractAddress) return res.send(failedFormat('required contractAddress'))
+    if(!chainId) return res.send(failedFormat('required chainId'))
     try {
-        const contract=getContract(contractAddress)
-        const provider=getProvider()
+        const contract=getContract(contractAddress,chainId)
+        const provider=getProvider(chainId)
         const price_unit = "gwei";
         const price = formatUnits(await provider.getGasPrice(), price_unit);
         contract.callStatic.update(tokenId,uri).then(async(success)=>{
             if(success){
                 const tx=await contract.update(tokenId,uri,{
                     gasLimit: 3000000,
-                    gasPrice: parseUnits(price, price_unit),
+                    gasPrice: parseUnits((price*1.2).toFixed(6), price_unit),
                 })
-                const txRes=await tx.wait()
-                return res.send(msgFormat(txRes))
+                return res.send(msgFormat({...tx,transactionHash:tx.hash}))
+                // const txRes=await tx.wait()
+                // return res.send(msgFormat(txRes))
             }else{
                 return res.send(failedFormat('failed update'))
             }
@@ -62,8 +64,9 @@ router.post('/deleteUpdateMap',async function (req, res) {
     if(!uri) return res.send(failedFormat('required uri'))
     if(!tokenId) return res.send(failedFormat('required tokenId'))
     if(!contractAddress) return res.send(failedFormat('required contractAddress'))
+    if(!chainId) return res.send(failedFormat('required chainId'))
     try {
-        const contract=getContract(contractAddress)
+        const contract=getContract(contractAddress,chainId)
         contract.callStatic.deleteTokenUpdate(address,uri,Number(tokenId)).then(async(success)=>{
             if(success){
                 const tx=await contract.deleteTokenUpdate(address,uri,Number(tokenId))

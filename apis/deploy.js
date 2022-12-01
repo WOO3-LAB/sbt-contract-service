@@ -6,11 +6,13 @@ const {compile}=require('../scripts/compile');
 
 
 router.get('/',async function (req, res) {
-    const {name}=req.query
+    const {name,chainId}=req.query
+    log(name,chainId)
     if(!name) return res.send(failedFormat('required name'))
+    if(!chainId) return res.send(failedFormat('required chainId'))
     try {
         const {abi,bytecode}=compile(name)
-        const address=await deploy(abi,bytecode)
+        const address=await deploy(chainId,abi,bytecode)
         res.send(msgFormat(address))
     } catch (error) {
         log(error)

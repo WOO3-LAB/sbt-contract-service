@@ -1,16 +1,15 @@
 {
-  "name": "sbt-contract-service",
-  "version": "1.0.0",
+  "name": "woo3-contract",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start":"pm2 start pm2.config.js",
+    "start":"pm2 start pro.config.js",
     "reload":"pm2 reload all",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "contract",
-    "node"
+    "contract"
   ],
   "author": "",
   "license": "ISC",
