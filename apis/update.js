@@ -14,19 +14,27 @@ router.post('/',async function (req, res) {
         const provider=getProvider(chainId)
         const price_unit = "gwei";
         const price = formatUnits(await provider.getGasPrice(), price_unit);
-        contract.callStatic.update(tokenId,uri).then(async(success)=>{
-            if(success){
-                const tx=await contract.update(tokenId,uri,{
-                    gasLimit: 3000000,
-                    gasPrice: parseUnits((price*1.2).toFixed(6), price_unit),
-                })
-                return res.send(msgFormat({...tx,transactionHash:tx.hash}))
-                // const txRes=await tx.wait()
-                // return res.send(msgFormat(txRes))
-            }else{
-                return res.send(failedFormat('failed update'))
-            }
-        }).catch(err=>res.send(failedFormat(err)))
+        if(chainId=='23294'||chainId=='23295'){
+            const tx=await contract.update(tokenId,uri,{
+                gasLimit: 3000000,
+                gasPrice: parseUnits((price*1.2).toFixed(6), price_unit),
+            })
+            return res.send(msgFormat({...tx,transactionHash:tx.hash}))
+        }else{
+            contract.callStatic.update(tokenId,uri).then(async(success)=>{
+                if(success){
+                    const tx=await contract.update(tokenId,uri,{
+                        gasLimit: 3000000,
+                        gasPrice: parseUnits((price*1.2).toFixed(6), price_unit),
+                    })
+                    return res.send(msgFormat({...tx,transactionHash:tx.hash}))
+                    // const txRes=await tx.wait()
+                    // return res.send(msgFormat(txRes))
+                }else{
+                    return res.send(failedFormat('failed update'))
+                }
+            }).catch(err=>res.send(failedFormat(err)))
+        }
     } catch (error) {
         res.send(failedFormat(error.message||error))
     }

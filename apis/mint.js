@@ -16,21 +16,30 @@ router.post('/',async function (req, res) {
         const gasPrice=await provider.getGasPrice()
         const price = formatUnits(gasPrice, price_unit);
         log(price)
-        contract.callStatic.safeMint(address,uri).then(async(success)=>{
-            log(success)
-            if(success){
-                const tx=await contract.safeMint(address,uri,{
-                    gasLimit: 3000000,
-                    gasPrice: parseUnits((price*1.2).toFixed(6), price_unit),
-                })
-                log(tx)
-                return res.send(msgFormat({...tx,transactionHash:tx.hash}))
-                // const txRes=await tx.wait()
-                // return res.send(msgFormat(txRes))
-            }else{
-                return res.send(failedFormat('failed to mint address'))
-            }
-        }).catch(err=>res.send(failedFormat(err)))
+        if(chainId=='23294'||chainId=='23295'){
+            const tx=await contract.safeMint(address,uri,{
+                gasLimit: 3000000,
+                gasPrice: parseUnits((price*1.2).toFixed(6), price_unit),
+            })
+            log(tx)
+            return res.send(msgFormat({...tx,transactionHash:tx.hash}))
+        }else{
+            contract.callStatic.safeMint(address,uri).then(async(success)=>{
+                log(success)
+                if(success){
+                    const tx=await contract.safeMint(address,uri,{
+                        gasLimit: 3000000,
+                        gasPrice: parseUnits((price*1.2).toFixed(6), price_unit),
+                    })
+                    log(tx)
+                    return res.send(msgFormat({...tx,transactionHash:tx.hash}))
+                    // const txRes=await tx.wait()
+                    // return res.send(msgFormat(txRes))
+                }else{
+                    return res.send(failedFormat('failed to mint address'))
+                }
+            }).catch(err=>res.send(failedFormat(err)))
+        }
     } catch (error) {
         res.send(failedFormat(error.message||error))
     }
